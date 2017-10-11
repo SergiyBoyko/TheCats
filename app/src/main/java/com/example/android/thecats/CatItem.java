@@ -7,7 +7,12 @@ package com.example.android.thecats;
 public class CatItem {
     private String imageTitle;
     private String imageUrl;
-    private Integer imageId;
+
+
+    public CatItem(String imageTitle, String imageUrl) {
+        this.imageTitle = imageTitle;
+        this.imageUrl = imageUrl;
+    }
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
@@ -17,11 +22,6 @@ public class CatItem {
         this.imageTitle = imageTitle;
     }
 
-    public void setImageId(Integer imageId) {
-        this.imageId = imageId;
-    }
-
-
     public String getImageUrl() {
         return imageUrl;
     }
@@ -30,7 +30,4 @@ public class CatItem {
         return imageTitle;
     }
 
-    public Integer getImageId() {
-        return imageId;
-    }
 }
