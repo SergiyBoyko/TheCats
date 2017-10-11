@@ -1,4 +1,6 @@
-package com.example.android.thecats;
+package com.example.android.thecats.api;
+
+import com.example.android.thecats.CatItem;
 
 import java.util.List;
 

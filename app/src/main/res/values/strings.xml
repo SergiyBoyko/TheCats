@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TheCats</string>
+    <string name="api_key">MjMyMzgz</string>
 </resources>
