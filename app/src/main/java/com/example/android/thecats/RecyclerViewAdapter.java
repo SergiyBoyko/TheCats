@@ -17,10 +17,10 @@ import java.util.ArrayList;
  */
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-    private ArrayList<CatItem> galleryList;
+    private ArrayList<Image> galleryList;
     private Context context;
 
-    public RecyclerViewAdapter(Context context, ArrayList<CatItem> galleryList) {
+    public RecyclerViewAdapter(Context context, ArrayList<Image> galleryList) {
         this.galleryList = galleryList;
         this.context = context;
     }
@@ -34,17 +34,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.title.setText(galleryList.get(position).getImageTitle());
+        holder.title.setText(galleryList.get(position).getId());
         holder.img.setScaleType(ImageView.ScaleType.CENTER_CROP);
         Glide
                 .with(context)
-                .load(galleryList.get(position).getImageUrl())
+                .load(galleryList.get(position).getUrl())
                 .into(holder.img);
 
     }
 
     @Override
     public int getItemCount() {
+        if (galleryList == null) return 0;
         return galleryList.size();
     }
 
