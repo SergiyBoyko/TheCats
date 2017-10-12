@@ -1,26 +1,43 @@
 package com.example.android.thecats;
 
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Root;
+
+import java.util.List;
+
 /**
  * Created by fbrsw on 11.10.2017.
  */
 
+@Root(name = "images", strict = false)
 public class Images {
-    private Image[] image;
 
-    public Image[] getImage ()
-    {
-        return image;
+    @ElementList(inline = true, required = false)
+    private List<Image> images;
+
+    public List<Image> getImages() {
+        return images;
     }
 
-    public void setImage (Image[] image)
-    {
-        this.image = image;
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
+
+    //    public Image getImage ()
+//    {
+//        return image;
+//    }
+//
+//    public void setImage (Image image)
+//    {
+//        this.image = image;
+//    }
 
     @Override
     public String toString()
     {
-        return "ClassPojo [image = "+image+"]";
+        return "ClassPojo [image = "+images+"]";
     }
 
 }

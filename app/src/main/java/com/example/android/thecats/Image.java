@@ -1,15 +1,24 @@
 package com.example.android.thecats;
 
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Root;
+
 /**
  * Created by fbrsw on 11.10.2017.
  */
 
+@Root(name = "image", strict = false)
 public class Image {
+
+    @Element(name = "url")
+    private String url;
+
+    @Element(name = "id")
     private String id;
 
+    @Element(name = "source_url")
     private String source_url;
-
-    private String url;
 
     public String getId ()
     {

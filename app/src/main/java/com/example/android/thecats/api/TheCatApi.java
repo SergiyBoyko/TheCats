@@ -1,10 +1,11 @@
 package com.example.android.thecats.api;
 
-import com.example.android.thecats.CatItem;
 import com.example.android.thecats.GeneralServerResponse;
+import com.example.android.thecats.Response;
 
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
@@ -14,6 +15,6 @@ import retrofit2.http.Query;
  */
 
 public interface TheCatApi {
-    @GET("/api/images/get")
-    Call<List<GeneralServerResponse>> getData(@Query("num") int count);
+    @GET("/api/images/get?api_key=MjMyMzgz&format=xml")
+    Call<Response> getData(@Query("results_per_page") int count);
 }

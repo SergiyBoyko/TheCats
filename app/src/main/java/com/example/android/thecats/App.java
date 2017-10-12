@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.example.android.thecats.api.TheCatApi;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
@@ -18,9 +19,9 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
         retrofit = new Retrofit.Builder()
                 .baseUrl("http://thecatapi.com") //Базовая часть адреса
+                .client(new OkHttpClient())
                 .addConverterFactory(SimpleXmlConverterFactory.create()) //Конвертер, необходимый для преобразования JSON'а в объекты
                 .build();
         api = retrofit.create(TheCatApi.class); //Создаем объект, при помощи которого будем выполнять запросы
