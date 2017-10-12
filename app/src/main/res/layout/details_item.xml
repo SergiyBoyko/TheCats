@@ -21,7 +21,6 @@
         android:background="#33000000"
         android:padding="1dp"
         android:text="text"
-        android:textColor="#"
         android:textSize="20dp" />
 
     <ImageButton

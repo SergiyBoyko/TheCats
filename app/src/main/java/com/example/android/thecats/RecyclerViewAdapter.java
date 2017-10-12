@@ -21,14 +21,27 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ArrayList<Image> galleryList;
     private Context context;
 
+    private View.OnClickListener mClickListener;
+
     public RecyclerViewAdapter(Context context, ArrayList<Image> galleryList) {
         this.galleryList = galleryList;
         this.context = context;
     }
 
+    public void setClickListener(View.OnClickListener callback) {
+        mClickListener = callback;
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recyclerview_item, parent, false);
+        ViewHolder holder = new ViewHolder(view);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mClickListener.onClick(view);
+            }
+        });
         return new ViewHolder(view);
 
     }
@@ -42,6 +55,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .load(galleryList.get(position).getUrl())
                 .into(holder.img);
 
+    }
+
+    public Image getItem(int pos)  {
+        if (galleryList.size() <= pos) {
+            System.out.println("errrrrrrrrrrrrrrooorrr " + pos + " " + galleryList.size());
+            return null;
+        }
+        return galleryList.get(pos);
     }
 
     @Override

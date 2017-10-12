@@ -1,10 +1,12 @@
 package com.example.android.thecats;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.android.thecats.Entity.*;
@@ -21,14 +23,30 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.imagegallery);
+        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.imagegallery);
         recyclerView.setHasFixedSize(true);
 
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 3);
         recyclerView.setLayoutManager(layoutManager);
         ArrayList<Image> createLists = loadFirst(50);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), createLists);
+        final RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), createLists);
         recyclerView.setAdapter(adapter);
+
+        adapter.setClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int pos = recyclerView.indexOfChild(v);
+
+                Image img = adapter.getItem(pos);
+
+                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+                intent.putExtra("id", img.getId());
+                intent.putExtra("url", img.getUrl());
+
+                //Start details activity
+                startActivity(intent);
+            }
+        });
 
     }
 

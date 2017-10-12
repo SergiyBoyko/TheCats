@@ -1,6 +1,5 @@
 package com.example.android.thecats.api;
 
-import com.example.android.thecats.GeneralServerResponse;
 import com.example.android.thecats.Entity.Response;
 
 import retrofit2.Call;

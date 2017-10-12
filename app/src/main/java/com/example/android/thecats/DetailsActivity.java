@@ -17,6 +17,7 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.details_item);
 
         String id = getIntent().getStringExtra("id");
         String url = getIntent().getStringExtra("url");
