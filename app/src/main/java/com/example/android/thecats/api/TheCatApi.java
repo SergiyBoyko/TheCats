@@ -1,11 +1,8 @@
 package com.example.android.thecats.api;
 
 import com.example.android.thecats.GeneralServerResponse;
-import com.example.android.thecats.Response;
+import com.example.android.thecats.Entity.Response;
 
-import java.util.List;
-
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;

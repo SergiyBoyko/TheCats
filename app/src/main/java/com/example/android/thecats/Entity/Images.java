@@ -1,6 +1,5 @@
-package com.example.android.thecats;
+package com.example.android.thecats.Entity;
 
-import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 

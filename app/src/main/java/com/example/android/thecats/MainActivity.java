@@ -7,16 +7,11 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
-import com.example.android.thecats.api.TheCatApi;
+import com.example.android.thecats.Entity.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
-
-import okhttp3.ResponseBody;
-import retrofit2.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,11 +32,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private class Task extends AsyncTask<Integer, Void, retrofit2.Response<Response>> {
+    private class Task extends AsyncTask<Integer, Void, retrofit2.Response<com.example.android.thecats.Entity.Response>> {
 
         @Override
-        protected retrofit2.Response<Response> doInBackground(Integer... integers) {
-            retrofit2.Response<Response> response = null;
+        protected retrofit2.Response<com.example.android.thecats.Entity.Response> doInBackground(Integer... integers) {
+            retrofit2.Response<com.example.android.thecats.Entity.Response> response = null;
             try {
                 response = App.getApi().getData(integers[0]).execute();
             } catch (IOException e) {
@@ -52,11 +47,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ArrayList<Image> loadFirst(int count) {
-        Response response = null;
+        com.example.android.thecats.Entity.Response response = null;
         Task t = new Task();
         t.execute(count);
         try {
-            retrofit2.Response<Response> rez = t.get();
+            retrofit2.Response<com.example.android.thecats.Entity.Response> rez = t.get();
             if (rez == null) Toast.makeText(this, "Error loading", Toast.LENGTH_LONG).show();
             else {
                 Toast.makeText(this, "Loaded", Toast.LENGTH_LONG).show();
