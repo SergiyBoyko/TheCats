@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void tryConnect() {
-        if (Handler.isOnline(this) && !connected) {
+        if (Utils.isOnline(this) && !connected) {
             prepareMainActivity();
         }
 
