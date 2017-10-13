@@ -1,6 +1,7 @@
 package com.example.android.thecats;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,28 +26,29 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ArrayList<Image> galleryList;
     private Context context;
 
-    private View.OnClickListener mClickListener;
+    private RecyclerClickListener mClickListener;
 
     public RecyclerViewAdapter(Context context, ArrayList<Image> galleryList) {
         this.galleryList = galleryList;
         this.context = context;
     }
 
-    public void setClickListener(View.OnClickListener callback) {
+    public void setClickListener(RecyclerClickListener callback) {
         mClickListener = callback;
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recyclerview_item, parent, false);
-        ViewHolder holder = new ViewHolder(view);
+        final ViewHolder holder = new ViewHolder(view);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mClickListener.onClick(view);
+                mClickListener.show(view, holder.getPosition());
             }
         });
-        return new ViewHolder(view);
+        holder.setIsRecyclable(false);
+        return holder;
 
     }
 
@@ -71,6 +73,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         return false;
                     }
                 })
+                .error(R.drawable.access_error)
                 .into(holder.img);
 
     }

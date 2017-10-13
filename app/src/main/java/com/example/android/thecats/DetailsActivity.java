@@ -50,6 +50,7 @@ public class DetailsActivity extends AppCompatActivity {
                         return false;
                     }
                 })
+                .error(R.drawable.access_error)
                 .into(imageView);
     }
 }

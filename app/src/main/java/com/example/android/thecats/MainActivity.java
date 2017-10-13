@@ -62,15 +62,13 @@ public class MainActivity extends AppCompatActivity {
         final RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), createLists);
         recyclerView.setAdapter(adapter);
 
-        adapter.setClickListener(new View.OnClickListener() {
+        adapter.setClickListener(new RecyclerClickListener() {
             @Override
             public void onClick(View v) {
-                int pos = recyclerView.indexOfChild(v);
-
-                Image img = adapter.getItem(pos);
+                Image img = adapter.getItem(getPos());
 
                 Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-                intent.putExtra("id", img.getId());
+                intent.putExtra("id", img.getId() + " " + getPos());
                 intent.putExtra("url", img.getUrl());
 
                 //Start details activity
