@@ -1,6 +1,7 @@
 package com.example.android.thecats;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -17,12 +18,48 @@ import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
+    private ConnectionReceiver connectionReceiver = new ConnectionReceiver();
+    private boolean connected = false;
+
+    private void registerBroadcastReceiver() {
+        this.registerReceiver(connectionReceiver, new IntentFilter(
+                "android.net.conn.CONNECTIVITY_CHANGE"));
+        Toast.makeText(getApplicationContext(), "Приёмник включен",
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void unregisterBroadcastReceiver() {
+        this.unregisterReceiver(connectionReceiver);
+
+        Toast.makeText(getApplicationContext(), "Приёмник выключён", Toast.LENGTH_SHORT)
+                .show();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        registerBroadcastReceiver();
 
+        tryConnect();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterBroadcastReceiver();
+    }
+
+    public void tryConnect() {
+        if (Handler.isOnline(this) && !connected) {
+            prepareMainActivity();
+        }
+
+    }
+
+    private void prepareMainActivity() {
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.imagegallery);
         recyclerView.setHasFixedSize(true);
 
@@ -47,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
     }
 
     private class Task extends AsyncTask<Integer, Void, retrofit2.Response<com.example.android.thecats.Entity.Response>> {
@@ -56,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
         protected retrofit2.Response<com.example.android.thecats.Entity.Response> doInBackground(Integer... integers) {
             retrofit2.Response<com.example.android.thecats.Entity.Response> response = null;
             try {
+                if (integers.length < 1) throw new IOException();
                 response = App.getApi().getData(integers[0]).execute();
             } catch (IOException e) {
                 e.printStackTrace();

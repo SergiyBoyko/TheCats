@@ -22,14 +22,6 @@
         </activity>
         <activity android:name=".DetailsActivity" />
 
-        <receiver
-            android:name=".ConnectionReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>
