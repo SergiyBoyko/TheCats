@@ -28,13 +28,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.LENGTH_SHORT).show();
     }
 
-    private void unregisterBroadcastReceiver() {
-        this.unregisterReceiver(connectionReceiver);
-
-        Toast.makeText(getApplicationContext(), "Приёмник выключён", Toast.LENGTH_SHORT)
-                .show();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterBroadcastReceiver();
+        this.unregisterReceiver(connectionReceiver);
     }
 
     public void tryConnect() {

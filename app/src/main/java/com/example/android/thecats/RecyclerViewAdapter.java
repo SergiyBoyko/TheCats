@@ -6,9 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.example.android.thecats.Entity.Image;
 
 import java.util.ArrayList;
@@ -47,19 +51,32 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.title.setText(galleryList.get(position).getId());
         holder.img.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
         Glide
                 .with(context)
                 .load(galleryList.get(position).getUrl())
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        holder.progressBar.setVisibility(View.GONE);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        holder.progressBar.setVisibility(View.GONE);
+                        return false;
+                    }
+                })
                 .into(holder.img);
 
     }
 
     public Image getItem(int pos)  {
         if (galleryList.size() <= pos) {
-            System.out.println("errrrrrrrrrrrrrrooorrr " + pos + " " + galleryList.size());
             return null;
         }
         return galleryList.get(pos);
@@ -74,10 +91,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView title;
         private ImageView img;
+        private ProgressBar progressBar;
         public ViewHolder(View itemView) {
             super(itemView);
             title = (TextView)itemView.findViewById(R.id.title);
             img = (ImageView) itemView.findViewById(R.id.img);
+            progressBar = (ProgressBar) itemView.findViewById(R.id.progress);
         }
     }
 }
