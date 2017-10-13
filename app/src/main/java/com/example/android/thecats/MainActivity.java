@@ -21,19 +21,12 @@ public class MainActivity extends AppCompatActivity {
     private ConnectionReceiver connectionReceiver = new ConnectionReceiver();
     private boolean connected = false;
 
-    private void registerBroadcastReceiver() {
-        this.registerReceiver(connectionReceiver, new IntentFilter(
-                "android.net.conn.CONNECTIVITY_CHANGE"));
-        Toast.makeText(getApplicationContext(), "Приёмник включен",
-                Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        registerBroadcastReceiver();
+        this.registerReceiver(connectionReceiver, new IntentFilter(
+                "android.net.conn.CONNECTIVITY_CHANGE"));
 
         tryConnect();
 
@@ -48,15 +41,22 @@ public class MainActivity extends AppCompatActivity {
     public void tryConnect() {
         if (Utils.isOnline(this) && !connected) {
             prepareMainActivity();
+            connected = true;
         }
 
+    }
+
+    private boolean loadMore(RecyclerViewAdapter adapter, int count) {
+        if (!Utils.isOnline(this) || adapter == null) return false;
+        ArrayList<Image> createLists = loadFirst(count);
+        return adapter.addItems(createLists);
     }
 
     private void prepareMainActivity() {
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.imagegallery);
         recyclerView.setHasFixedSize(true);
 
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 3);
+        final RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 3);
         recyclerView.setLayoutManager(layoutManager);
         ArrayList<Image> createLists = loadFirst(50);
         final RecyclerViewAdapter adapter = new RecyclerViewAdapter(getApplicationContext(), createLists);
@@ -73,6 +73,26 @@ public class MainActivity extends AppCompatActivity {
 
                 //Start details activity
                 startActivity(intent);
+            }
+        });
+
+        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                GridLayoutManager layoutManager = ((GridLayoutManager)recyclerView.getLayoutManager());
+
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int pastVisibleItems = layoutManager.findFirstVisibleItemPosition();
+                if (pastVisibleItems + visibleItemCount >= totalItemCount) {
+                    //End of list
+                    loadMore(adapter, 50);
+                    Toast.makeText(MainActivity.this, "Adding", Toast.LENGTH_LONG).show();
+                }
+
             }
         });
     }

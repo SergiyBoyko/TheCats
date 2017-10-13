@@ -78,7 +78,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     }
 
-    public Image getItem(int pos)  {
+    public boolean addItems(ArrayList<Image> newItems) {
+        if (newItems != null) {
+            galleryList.addAll(newItems);
+            notifyDataSetChanged();
+            return true;
+        }
+        return false;
+    }
+
+    public Image getItem(int pos) {
         if (galleryList.size() <= pos) {
             return null;
         }
@@ -95,9 +104,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private TextView title;
         private ImageView img;
         private ProgressBar progressBar;
+
         public ViewHolder(View itemView) {
             super(itemView);
-            title = (TextView)itemView.findViewById(R.id.title);
+            title = (TextView) itemView.findViewById(R.id.title);
             img = (ImageView) itemView.findViewById(R.id.img);
             progressBar = (ProgressBar) itemView.findViewById(R.id.progress);
         }
