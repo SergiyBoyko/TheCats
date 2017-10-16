@@ -1,12 +1,19 @@
-package com.example.android.thecats.Category;
+package com.example.android.thecats.response;
+
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Root;
 
 /**
  * Created by fbrsw on 16.10.2017.
  */
 
+@Root(name = "category", strict = false)
 public class Category {
+
+    @Element(name = "id")
     private String id;
 
+    @Element(name = "name")
     private String name;
 
     public String getId ()

@@ -1,4 +1,4 @@
-package com.example.android.thecats.Entity;
+package com.example.android.thecats.response;
 
 /**
  * Created by fbrsw on 11.10.2017.

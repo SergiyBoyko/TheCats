@@ -1,4 +1,4 @@
-package com.example.android.thecats.Entity;
+package com.example.android.thecats.response;
 
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
