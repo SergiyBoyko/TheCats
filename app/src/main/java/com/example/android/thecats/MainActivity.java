@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,10 +24,13 @@ import android.widget.Toast;
 import com.example.android.thecats.response.Category;
 import com.example.android.thecats.response.Image;
 import com.example.android.thecats.response.Response;
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -49,12 +53,11 @@ public class MainActivity extends ActionBarActivity {
     private String[] mPlanetTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-//    private ActionBarDrawerToggle actionBarDrawerToggle;
-
     private ConnectionReceiver connectionReceiver = new ConnectionReceiver();
     private boolean connected = false;
 
-    CallbackManager callbackManager;
+    private CallbackManager callbackManager;
+    private String userId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +66,8 @@ public class MainActivity extends ActionBarActivity {
 
         this.registerReceiver(connectionReceiver, new IntentFilter(
                 "android.net.conn.CONNECTIVITY_CHANGE"));
+
+
         tryConnect();
     }
 
@@ -72,12 +77,25 @@ public class MainActivity extends ActionBarActivity {
         this.unregisterReceiver(connectionReceiver);
     }
 
+    private void checkAlreadyLogging() {
+        AccessToken token;
+        token = AccessToken.getCurrentAccessToken();
+        if (token != null) {
+            userId = token.getUserId();
+            ImageView mImg = ((ImageView) findViewById(R.id.user_pic));
+            try {
+                mImg.setImageBitmap(getFacebookProfilePicture(userId));
+            } catch (IOException | ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void initFacebookLogin() {
         FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
         LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
 
-//        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile"));
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
 
@@ -85,42 +103,66 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onSuccess(LoginResult loginResult) {
 
-                String s =  "User ID: "
-                        + loginResult.getAccessToken().getUserId()
-                        + "\n" +
-                        "Auth Token: "
-                        + loginResult.getAccessToken().getToken();
-
-                Toast.makeText(MainActivity.this, s, Toast.LENGTH_LONG).show();
+                userId = loginResult.getAccessToken().getUserId();
+                String authToken = loginResult.getAccessToken().getToken();
 
             }
 
             @Override
             public void onCancel() {
-
-                Toast.makeText(MainActivity.this, "cancel", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "login canceled", Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onError(FacebookException error) {
-
-
-                Toast.makeText(MainActivity.this, "onError " + error.toString(), Toast.LENGTH_LONG).show();
-                System.out.println("hasherrorhasherrorhasherror" + error.toString());
+                Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_LONG).show();
             }
         });
 
+
+        new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken,
+                                                       AccessToken currentAccessToken) {
+                if (currentAccessToken == null) {
+                    //write your code here what to do when user logout
+                    ImageView mImg = ((ImageView) findViewById(R.id.user_pic));
+                    mImg.setImageResource(android.R.color.transparent);
+                    userId = null;
+                } else {
+                    ImageView mImg = ((ImageView) findViewById(R.id.user_pic));
+                    try {
+                        mImg.setImageBitmap(getFacebookProfilePicture(userId));
+                    } catch (IOException | ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
     }
 
-    public static Bitmap getFacebookProfilePicture(String userID) throws SocketException, SocketTimeoutException, MalformedURLException, IOException, Exception
-    {
-        String imageURL;
+    private class ProfilePhotoLoader extends AsyncTask<String, Void, Bitmap> {
 
-        Bitmap bitmap = null;
-        imageURL = "http://graph.facebook.com/"+userID+"/picture?type=large";
-        InputStream in = (InputStream) new URL(imageURL).getContent();
-        bitmap = BitmapFactory.decodeStream(in);
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            Bitmap bitmap = null;
+            try {
+                if (params.length < 1) throw new IOException();
+                URL imageURL = new URL("https://graph.facebook.com/" + params[0] + "/picture?type=large");
+                bitmap = BitmapFactory.decodeStream(imageURL.openConnection().getInputStream());
 
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return bitmap;
+        }
+    }
+
+    public Bitmap getFacebookProfilePicture(String userID) throws IOException, ExecutionException, InterruptedException {
+        ProfilePhotoLoader loader = new ProfilePhotoLoader();
+        loader.execute(userID);
+        Bitmap bitmap = loader.get();
         return bitmap;
     }
 
@@ -129,7 +171,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Toast.makeText(MainActivity.this, "onActivityResult " + requestCode + " " + resultCode , Toast.LENGTH_LONG).show();
+        Toast.makeText(MainActivity.this, "onActivityResult " + requestCode + " " + resultCode, Toast.LENGTH_LONG).show();
 
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
@@ -140,6 +182,7 @@ public class MainActivity extends ActionBarActivity {
             prepareNavigationDrawer();
             configToolBar();
             initFacebookLogin();
+            checkAlreadyLogging();
             connected = true;
         }
 
