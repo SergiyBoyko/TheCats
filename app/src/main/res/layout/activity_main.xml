@@ -50,25 +50,42 @@
             android:scaleType="fitCenter"
             android:src="@drawable/header" />
 
-        <Button
-            android:id="@+id/button_1"
+        <ImageView
+            android:id="@+id/user_pic"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="50dp"
+            android:layout_centerHorizontal="true"
+            />
+
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/login_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/header"
-            android:layout_gravity="center"
-            android:layout_margin="2dp"
-            android:background="@android:color/white"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text="Sign in"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp" />
+
+        <!--<Button-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@id/header"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:layout_margin="2dp"-->
+            <!--android:background="@android:color/white"-->
+            <!--android:paddingBottom="15dp"-->
+            <!--android:paddingTop="15dp"-->
+            <!--android:text="Sign in"-->
+            <!--android:textSize="20sp" />-->
 
 
         <ListView
             android:id="@+id/left_drawer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/button_1"
+            android:layout_below="@id/login_button"
             android:layout_marginLeft="2dp"
             android:layout_marginRight="2dp"
             android:background="@android:color/white"
