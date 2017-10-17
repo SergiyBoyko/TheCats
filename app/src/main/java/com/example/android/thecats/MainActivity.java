@@ -15,7 +15,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,29 +29,25 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
-import com.facebook.Profile;
-import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.facebook.login.widget.ProfilePictureView;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends ActionBarActivity {
+    private static final String CUSTOM_CATEGORY = "favourites";
+
     private RecyclerViewAdapter adapter;
     private RecyclerView recyclerView;
-    private String[] mPlanetTitles;
+    private String[] categories;
+    private int currentCategoryIndex = -1;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
+
     private ConnectionReceiver connectionReceiver = new ConnectionReceiver();
     private boolean connected = false;
 
@@ -77,18 +72,33 @@ public class MainActivity extends ActionBarActivity {
         this.unregisterReceiver(connectionReceiver);
     }
 
-    private void checkAlreadyLogging() {
+
+    public void tryConnect() {
+        if (Utils.isOnline(this) && !connected) {
+            prepareMainActivity();
+            prepareNavigationDrawer();
+            configToolBar();
+            initFacebookLogin();
+            checkAlreadyLogging();
+            connected = true;
+        }
+    }
+
+    private boolean checkAlreadyLogging() {
         AccessToken token;
         token = AccessToken.getCurrentAccessToken();
-        if (token != null) {
+        if (token != null && userId == null) {
             userId = token.getUserId();
             ImageView mImg = ((ImageView) findViewById(R.id.user_pic));
             try {
                 mImg.setImageBitmap(getFacebookProfilePicture(userId));
+                ((TextView) findViewById(R.id.user_id)).setText(userId);
             } catch (IOException | ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
+            return true;
         }
+        return token != null;
     }
 
     private void initFacebookLogin() {
@@ -104,7 +114,7 @@ public class MainActivity extends ActionBarActivity {
             public void onSuccess(LoginResult loginResult) {
 
                 userId = loginResult.getAccessToken().getUserId();
-                String authToken = loginResult.getAccessToken().getToken();
+//                String authToken = loginResult.getAccessToken().getToken();
 
             }
 
@@ -133,6 +143,7 @@ public class MainActivity extends ActionBarActivity {
                     ImageView mImg = ((ImageView) findViewById(R.id.user_pic));
                     try {
                         mImg.setImageBitmap(getFacebookProfilePicture(userId));
+                        ((TextView) findViewById(R.id.user_id)).setText(userId);
                     } catch (IOException | ExecutionException | InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -176,22 +187,21 @@ public class MainActivity extends ActionBarActivity {
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void tryConnect() {
-        if (Utils.isOnline(this) && !connected) {
-            prepareMainActivity();
-            prepareNavigationDrawer();
-            configToolBar();
-            initFacebookLogin();
-            checkAlreadyLogging();
-            connected = true;
-        }
-
-    }
-
     private boolean loadMore(RecyclerViewAdapter adapter, int count) {
         if (!Utils.isOnline(this) || adapter == null) return false;
-        ArrayList<Image> createLists = loadFirst(count, null);
-        return adapter.addItems(createLists);
+        ArrayList<Image> createLists = null;
+        if (currentCategoryIndex == -1) {
+            createLists = loadFirst(count, null);
+            adapter.addItems(createLists);
+        }
+        else if (currentCategoryIndex != 0) {
+            createLists = loadFirst(count, categories[currentCategoryIndex]);
+            adapter.addItems(createLists);
+        }
+        else return false;
+
+
+        return true;
     }
 
     private void prepareMainActivity() {
@@ -241,24 +251,30 @@ public class MainActivity extends ActionBarActivity {
 
 
     private void prepareNavigationDrawer() {
-        mPlanetTitles = loadCategories();
+        categories = loadCategories();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
 
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mPlanetTitles));
+                R.layout.drawer_list_item, categories));
 
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 try {
-                    Toast.makeText(MainActivity.this, "Category " + mPlanetTitles[i], Toast.LENGTH_SHORT).show();
-                    ArrayList<Image> images = loadFirst(50, mPlanetTitles[i]);
+                    if (i == 0 && !checkAlreadyLogging()) {
+                        Toast.makeText(MainActivity.this, "Login first!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    currentCategoryIndex = i;
+                    ArrayList<Image> images = loadFirst(50, categories[i]);
+                    Toast.makeText(MainActivity.this, "Category " + categories[i], Toast.LENGTH_SHORT).show();
                     adapter.setGalleryList(images);
                     recyclerView.scrollToPosition(0);
                     mDrawerLayout.closeDrawers();
                 } catch (Exception e) {
+                    e.printStackTrace();
                     Toast.makeText(MainActivity.this, "Server error", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -297,6 +313,8 @@ public class MainActivity extends ActionBarActivity {
 
         List<String> strings = new ArrayList<>();
 
+        strings.add(CUSTOM_CATEGORY);
+
         for (Category c : response.getData().getCategories().getCategory()) {
             strings.add(c.getName());
         }
@@ -327,6 +345,8 @@ public class MainActivity extends ActionBarActivity {
                 if (strings.length < 2) throw new IOException();
                 if (strings[0] == null)
                     response = App.getApi().getData(Integer.parseInt(strings[1])).execute();
+                else if (strings[0].equals(CUSTOM_CATEGORY))
+                    response = App.getApi().getFavourites(userId).execute();
                 else
                     response = App.getApi().getData(Integer.parseInt(strings[1]), strings[0]).execute();
             } catch (IOException e) {
@@ -354,6 +374,8 @@ public class MainActivity extends ActionBarActivity {
         if (response != null)
             images.addAll(response.getData().getImages().getImages());
 
+        System.out.println("sizesizesizesizesize " + images.size());
+//        Toast.makeText(MainActivity.this, images.size(), Toast.LENGTH_LONG).show();
         return images;
     }
 

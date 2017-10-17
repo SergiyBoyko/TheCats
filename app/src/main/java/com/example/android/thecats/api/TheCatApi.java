@@ -19,4 +19,11 @@ public interface TheCatApi {
 
     @GET("/api/categories/list")
     Call<Response> getCategories();
+
+    @GET("/api/images/getfavourites?api_key=MjMyMzgz&format=xml")
+    Call<Response> getFavourites(@Query("sub_id") String subId);
+
+    @GET("/api/images/favourite?api_key=MjMyMzgz&format=xml")
+    Call<Response> action(@Query("sub_id") String subId, @Query("image_id") String imageId, @Query("action") String remove);
+
 }

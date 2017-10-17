@@ -16,8 +16,30 @@ public class Image {
     @Element(name = "id")
     private String id;
 
-    @Element(name = "source_url")
+    @Element(name = "source_url", required = false)
     private String source_url;
+
+    @Element(name = "sub_id", required = false)
+    private String sub_id;
+
+    @Element(name = "created", required = false)
+    private String created;
+
+    public String getSub_id() {
+        return sub_id;
+    }
+
+    public void setSub_id(String sub_id) {
+        this.sub_id = sub_id;
+    }
+
+    public String getCreated() {
+        return created;
+    }
+
+    public void setCreated(String created) {
+        this.created = created;
+    }
 
     public String getId ()
     {
