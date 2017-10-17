@@ -221,9 +221,10 @@ public class MainActivity extends ActionBarActivity {
                 Image img = adapter.getItem(getPos());
 
                 Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-                intent.putExtra("id", img.getId() + " " + getPos());
+                intent.putExtra("id", img.getId());
+                intent.putExtra("pos", String.valueOf(getPos()));
                 intent.putExtra("url", img.getUrl());
-
+                intent.putExtra("userId", userId);
                 //Start details activity
                 startActivity(intent);
             }
