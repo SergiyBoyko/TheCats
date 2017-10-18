@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -20,6 +22,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.example.android.thecats.response.Category;
 import com.example.android.thecats.response.Image;
 import com.example.android.thecats.response.Response;
@@ -40,11 +44,15 @@ import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends ActionBarActivity {
     private static final String CUSTOM_CATEGORY = "favourites";
+    private static final String ALL_CATEGORIES = "ALL";
 
     private RecyclerViewAdapter adapter;
     private RecyclerView recyclerView;
+
     private String[] categories;
     private int currentCategoryIndex = -1;
+
+    private Toolbar toolbar;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
 
@@ -89,16 +97,31 @@ public class MainActivity extends ActionBarActivity {
         token = AccessToken.getCurrentAccessToken();
         if (token != null && userId == null) {
             userId = token.getUserId();
-            ImageView mImg = ((ImageView) findViewById(R.id.user_pic));
-            try {
-                mImg.setImageBitmap(getFacebookProfilePicture(userId));
-                ((TextView) findViewById(R.id.user_id)).setText(userId);
-            } catch (IOException | ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
+            Glide
+                    .with(MainActivity.this)
+                    .load(Utils.getProfilePhotoById(userId))
+                    .asBitmap()
+                    .centerCrop()
+                    .into(getBitmapTargetForUserPhoto());
+            String title = "id:" + userId;
+            ((TextView) findViewById(R.id.user_id)).setText(title);
             return true;
         }
         return token != null;
+    }
+
+    // round corners
+    private BitmapImageViewTarget getBitmapTargetForUserPhoto() {
+        final ImageView mImg = ((ImageView) findViewById(R.id.user_pic));
+        return new BitmapImageViewTarget(mImg) {
+            @Override
+            protected void setResource(Bitmap resource) {
+                RoundedBitmapDrawable circularBitmapDrawable =
+                        RoundedBitmapDrawableFactory.create(getResources(), resource);
+                circularBitmapDrawable.setCircular(true);
+                mImg.setImageDrawable(circularBitmapDrawable);
+            }
+        };
     }
 
     private void initFacebookLogin() {
@@ -139,50 +162,26 @@ public class MainActivity extends ActionBarActivity {
                     ImageView mImg = ((ImageView) findViewById(R.id.user_pic));
                     mImg.setImageResource(android.R.color.transparent);
                     userId = null;
+                    ((TextView) findViewById(R.id.user_id)).setText("");
                 } else {
-                    ImageView mImg = ((ImageView) findViewById(R.id.user_pic));
-                    try {
-                        mImg.setImageBitmap(getFacebookProfilePicture(userId));
-                        ((TextView) findViewById(R.id.user_id)).setText(userId);
-                    } catch (IOException | ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    Glide
+                            .with(MainActivity.this)
+                            .load(Utils.getProfilePhotoById(userId))
+                            .asBitmap()
+                            .centerCrop()
+                            .into(getBitmapTargetForUserPhoto());
+                    String title = "id:" + userId;
+                    ((TextView) findViewById(R.id.user_id)).setText(title);
                 }
             }
         };
-
     }
-
-    private class ProfilePhotoLoader extends AsyncTask<String, Void, Bitmap> {
-
-        @Override
-        protected Bitmap doInBackground(String... params) {
-            Bitmap bitmap = null;
-            try {
-                if (params.length < 1) throw new IOException();
-                URL imageURL = new URL("https://graph.facebook.com/" + params[0] + "/picture?type=large");
-                bitmap = BitmapFactory.decodeStream(imageURL.openConnection().getInputStream());
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return bitmap;
-        }
-    }
-
-    public Bitmap getFacebookProfilePicture(String userID) throws IOException, ExecutionException, InterruptedException {
-        ProfilePhotoLoader loader = new ProfilePhotoLoader();
-        loader.execute(userID);
-        Bitmap bitmap = loader.get();
-        return bitmap;
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Toast.makeText(MainActivity.this, "onActivityResult " + requestCode + " " + resultCode, Toast.LENGTH_LONG).show();
+//        Toast.makeText(MainActivity.this, "onActivityResult " + requestCode + " " + resultCode, Toast.LENGTH_LONG).show();
 
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
@@ -190,16 +189,13 @@ public class MainActivity extends ActionBarActivity {
     private boolean loadMore(RecyclerViewAdapter adapter, int count) {
         if (!Utils.isOnline(this) || adapter == null) return false;
         ArrayList<Image> createLists = null;
-        if (currentCategoryIndex == -1) {
+        if (categories[currentCategoryIndex].equals(ALL_CATEGORIES)) {
             createLists = loadFirst(count, null);
             adapter.addItems(createLists);
-        }
-        else if (currentCategoryIndex != 0) {
+        } else if (!categories[currentCategoryIndex].equals(CUSTOM_CATEGORY)) {
             createLists = loadFirst(count, categories[currentCategoryIndex]);
             adapter.addItems(createLists);
-        }
-        else return false;
-
+        } else return false;
 
         return true;
     }
@@ -264,12 +260,16 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 try {
-                    if (i == 0 && !checkAlreadyLogging()) {
+                    if (categories[i].equals(CUSTOM_CATEGORY) && !checkAlreadyLogging()) {
                         Toast.makeText(MainActivity.this, "Login first!", Toast.LENGTH_SHORT).show();
                         return;
                     }
+                    ArrayList<Image> images = null;
+                    if (categories[i].equals(ALL_CATEGORIES)) {
+                        images = loadFirst(50, null);
+                    } else images = loadFirst(50, categories[i]);
                     currentCategoryIndex = i;
-                    ArrayList<Image> images = loadFirst(50, categories[i]);
+                    if (toolbar != null) toolbar.setTitle(categories[i]);
                     Toast.makeText(MainActivity.this, "Category " + categories[i], Toast.LENGTH_SHORT).show();
                     adapter.setGalleryList(images);
                     recyclerView.scrollToPosition(0);
@@ -315,6 +315,8 @@ public class MainActivity extends ActionBarActivity {
         List<String> strings = new ArrayList<>();
 
         strings.add(CUSTOM_CATEGORY);
+        strings.add(ALL_CATEGORIES);
+        currentCategoryIndex = 1;
 
         for (Category c : response.getData().getCategories().getCategory()) {
             strings.add(c.getName());
@@ -327,11 +329,12 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void configToolBar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.categ);
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //        getSupportActionBar().setHomeButtonEnabled(true);
+
 
         new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.app_name, R.string.app_name);
     }
@@ -375,7 +378,7 @@ public class MainActivity extends ActionBarActivity {
         if (response != null)
             images.addAll(response.getData().getImages().getImages());
 
-        System.out.println("sizesizesizesizesize " + images.size());
+//        System.out.println("sizesizesizesizesize " + images.size());
 //        Toast.makeText(MainActivity.this, images.size(), Toast.LENGTH_LONG).show();
         return images;
     }

@@ -69,9 +69,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     @Override
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                         holder.progressBar.setVisibility(View.GONE);
-                        Toast.makeText(context, "error " + holder.getItemId() + " pos " + position, Toast.LENGTH_LONG).show();
-                        galleryList.remove(position);
-                        notifyDataSetChanged();
+//                        Toast.makeText(context, "error " + holder.getItemId() + " pos " + position, Toast.LENGTH_LONG).show();
+                        if (galleryList.size() > position) {
+                            galleryList.remove(position);
+                            notifyDataSetChanged();
+                        }
                         return false;
                     }
 

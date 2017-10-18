@@ -27,4 +27,8 @@ public class Utils {
         //should check null because in airplane mode it will be null
         return (netInfo != null && netInfo.isConnected());
     }
+
+    public static String getProfilePhotoById(String userId) {
+        return "https://graph.facebook.com/" + userId + "/picture?type=large";
+    }
 }
