@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
@@ -57,7 +58,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.title.setText(galleryList.get(position).getId());
         holder.img.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
@@ -68,6 +69,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     @Override
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                         holder.progressBar.setVisibility(View.GONE);
+                        Toast.makeText(context, "error " + holder.getItemId() + " pos " + position, Toast.LENGTH_LONG).show();
+                        galleryList.remove(position);
+                        notifyDataSetChanged();
                         return false;
                     }
 

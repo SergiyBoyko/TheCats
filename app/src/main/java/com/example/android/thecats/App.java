@@ -22,7 +22,7 @@ public class App extends Application {
         retrofit = new Retrofit.Builder()
                 .baseUrl("http://thecatapi.com") //Базовая часть адреса
                 .client(new OkHttpClient())
-                .addConverterFactory(SimpleXmlConverterFactory.create()) //Конвертер, необходимый для преобразования JSON'а в объекты
+                .addConverterFactory(SimpleXmlConverterFactory.create()) //Конвертер, необходимый для преобразования xml'а в объекты
                 .build();
         api = retrofit.create(TheCatApi.class); //Создаем объект, при помощи которого будем выполнять запросы
     }

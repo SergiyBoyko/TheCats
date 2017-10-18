@@ -68,12 +68,11 @@ public class DetailsActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Boolean... params) {
-            retrofit2.Response<com.example.android.thecats.response.Response> response = null;
             try {
                 String action = null;
                 if (params.length < 1) throw new IOException();
                 if (!params[0]) action = "remove";
-                response = App.getApi().action(userId, imgId, action).execute();
+                App.getApi().action(userId, imgId, action).execute();
             } catch (IOException e) {
                 e.printStackTrace();
             }
